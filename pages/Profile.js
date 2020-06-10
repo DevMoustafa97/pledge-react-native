@@ -14,7 +14,7 @@ import 'firebase/firestore';
 import { useState, useEffect } from 'react';
 import * as ImagePicker from 'expo-image-picker';
 import Constants from 'expo-constants';
-
+console.disableYellowBox = true;
 
 
 

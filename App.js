@@ -8,7 +8,7 @@ import DateTime from './pages/DateTime'
 import Profile from './pages/Profile'
 import firebase from 'firebase'
 export default function App() {
-
+  console.disableYellowBox = true;
 
   
 
