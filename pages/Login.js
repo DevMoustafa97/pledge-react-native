@@ -1,17 +1,44 @@
 import React from 'react';
-import { Button ,FormLabel, FormInput, FormValidationMessage } from 'react-native-elements'
+import { Button  } from 'react-native-elements'
 import { useFonts } from '@use-expo/font';
 import { Formik } from 'formik';
-
-import { ImageBackground, StyleSheet, TextInput, View ,Text } from 'react-native';
+import * as yup from 'yup'
+import { ImageBackground, StyleSheet, TextInput, View ,Text,Alert } from 'react-native';
 import {AppLoading} from 'expo'
+import * as firebase from 'firebase';
+import 'firebase/firestore';
 
 
+export const user = 'useruser';
 
+export default function Login  ({navigation}) {
 
-export default function Login({navigation}) {
+    //firebase auth stuff
+    const firebaseConfig = {
+      apiKey: "AIzaSyCoe0stc988TFu-VSHOyjU4w0AhkdynpqU",
+      authDomain: "test-1f901.firebaseapp.com",
+      databaseURL: "https://test-1f901.firebaseio.com",
+      projectId: "test-1f901",
+      storageBucket: "test-1f901.appspot.com",
+      messagingSenderId: "820076856872",
+      appId: "1:820076856872:web:0d17bd56f1734453cd571d",
+      measurementId: "G-F2Y1GJGPMD"
+    };
+    if (!firebase.apps.length) {
+      firebase.initializeApp(firebaseConfig);
+      }
+    const auth = firebase.auth()
+  //yup validation
+  const ReviewSchema = yup.object({
+    email:yup.string().required().email(),
+    password:yup.string().required()
+  })
+
+  
 
   const goBack = () =>{
+
+
     navigation.navigate('Home')
   }
 
@@ -26,8 +53,32 @@ export default function Login({navigation}) {
         <View style = {styles.root}>
         <Formik
             initialValues = {{email:'', password:''}}
+            validationSchema = {ReviewSchema}
             onSubmit = {(values) => {
-                console.log(values)
+              auth.signInWithEmailAndPassword(values.email, values.password).then((resp) => {
+                
+                if(resp.user.uid){
+
+                  navigation.navigate('Profile', {uid:resp.user.uid})
+                }
+                
+                
+              }).catch(err=>{
+                
+                  Alert.alert(
+                    'Pledge',
+                    err.message,
+                    [
+                    
+                      { text: 'OK' }
+                    ],
+                    { cancelable: false }
+                  );
+               
+              })
+              
+
+
             }}>
 
             {(formikProps) => (
@@ -48,16 +99,19 @@ export default function Login({navigation}) {
                         value = {formikProps.values.email}
                         />
                     </View>
+                    <Text style = {{fontSize:12,color:'crimson'}}>{formikProps.touched.email && formikProps.errors.email}</Text>
                     <View style = {{marginTop:"5%"}}>
                     <Text style = {{fontSize:48}} >Password:</Text>
                     <TextInput 
-                        style={{height: 50, borderColor: 'black', borderWidth: 2 ,borderRadius:7, marginBottom:"20%", paddingHorizontal:15,fontSize:21}}
+                        style={{height: 50, borderColor: 'black', borderWidth: 2 ,borderRadius:7, marginBottom:"0%", paddingHorizontal:15,fontSize:21}}
                         placeholder = ''
                         secureTextEntry = {true}
                         onChangeText = {formikProps.handleChange('password')}
                         value = {formikProps.values.password}
-                    />
+                     />
+                     <Text style = {{fontSize:12,color:'crimson'}}>{formikProps.touched.password && formikProps.errors.password}</Text>
                     </View>
+                             
                     <Button onPress = {formikProps.handleSubmit} title="Log in" type="outline" buttonStyle = {styles.buttonStyle} titleStyle = {styles.innerText} />
                 </View>
             )
@@ -129,7 +183,7 @@ const styles = StyleSheet.create({
     backText:{
         color:"#000", fontSize:24, fontWeight:"100" ,fontFamily:'Roboto'
     },
-    buttonStyle :{width:260,marginTop:"0%",marginHorizontal:'7%', borderRadius:10, borderColor:'#000',borderWidth:2,backgroundColor:'#ff00ff00' ,maxHeight:60 ,marginBottom:10},
+    buttonStyle :{width:260,marginTop:"10%",marginHorizontal:'7%', borderRadius:10, borderColor:'#000',borderWidth:2,backgroundColor:'#ff00ff00' ,maxHeight:60 ,marginBottom:10},
     innerText:{color:"#000", fontSize:32, fontWeight:"100" ,fontFamily:'Roboto' },
     input:{
       width:'80%',

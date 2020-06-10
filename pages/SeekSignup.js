@@ -2,13 +2,43 @@ import React from 'react';
 import { Button } from 'react-native-elements'
 import { useFonts } from '@use-expo/font';
 import { Formik } from 'formik';
-import { ImageBackground, StyleSheet, TextInput, View ,Text,ScrollView } from 'react-native';
+import { ImageBackground, StyleSheet, TextInput, View ,Text,ScrollView,Alert } from 'react-native';
 import {AppLoading} from 'expo'
+import * as yup from 'yup'
+import * as firebase from 'firebase';
+import 'firebase/firestore';
 
 
+export default function VolSignup({navigation}) {
+
+  //firebase auth stuff
+  const firebaseConfig = {
+    apiKey: "AIzaSyCoe0stc988TFu-VSHOyjU4w0AhkdynpqU",
+    authDomain: "test-1f901.firebaseapp.com",
+    databaseURL: "https://test-1f901.firebaseio.com",
+    projectId: "test-1f901",
+    storageBucket: "test-1f901.appspot.com",
+    messagingSenderId: "820076856872",
+    appId: "1:820076856872:web:0d17bd56f1734453cd571d",
+    measurementId: "G-F2Y1GJGPMD"
+  };
+  if (!firebase.apps.length) {
+    firebase.initializeApp(firebaseConfig);
+    }
+  const auth = firebase.auth()
+  const firestore = firebase.firestore();
 
 
-export default function SeekSignup({navigation}) {
+   //yup validation
+   const ReviewSchema = yup.object({
+    Firstname: yup.string().required(),
+    Lastname: yup.string().required(),
+    Email:yup.string().required().email(),
+    password:yup.string().required(),
+    age: yup.number().min(21).required(),
+    phone: yup.number().required()
+
+  })
   const goBack = () =>{
     navigation.navigate('Home')
   }
@@ -25,9 +55,42 @@ export default function SeekSignup({navigation}) {
                     </View>
         <View style = {styles.root}>
         <Formik
-            initialValues = {{fname:'',lname:'', email:'', password:'',phone:'',age:'',type:'seeker'}}
+            initialValues = {{Firstname:'',Lastname:'', Email:'', password:'',phone:'',age:'',type:'seek'}}
+            validationSchema = {ReviewSchema}
             onSubmit = {(values) => {
-              console.log(values)
+                console.log(values.Email)
+                auth.createUserWithEmailAndPassword(values.Email,values.password).then(resp=>{
+                  
+                  firebase.database().ref('users/' + resp.user.uid).set(
+                    {
+                      firstName:values.Firstname,
+                      lastName:values.Lastname,
+                      email:values.Email,
+                      password:values.password,
+                      phone:values.phone,
+                      age:values.age,
+                      type:values.type
+                    })
+                }).catch(err => {
+                  Alert.alert(
+                    'Pledge',
+                    err.message,
+                    [
+                    
+                      { text: 'OK' }
+                    ],
+                    { cancelable: false }
+                  );
+                })
+                Alert.alert(
+                  'Pledge',
+                  'Successfully signed up log in to proceed',
+                  [
+                  
+                    { text: 'OK', onPress: () => navigation.navigate('Login') }
+                  ],
+                  { cancelable: false }
+                );
             }}>
 
             {(formikProps) => (
@@ -37,19 +100,20 @@ export default function SeekSignup({navigation}) {
 
                 
 
-                    <View style = {{marginTop:"5%"}} >
+                    <View style = {{marginTop:"0%"}} >
                     <Text  style = {{fontSize:32}} >First Name:</Text>
                     </View>
 
                     <TextInput 
                         style={{height: 50, borderColor: 'black', borderWidth: 2 ,borderRadius:7, marginBottom:10, paddingHorizontal:15,fontSize:21}}
                         placeholder = ''
-                        onChangeText = {formikProps.handleChange('fname')}
-                        value = {formikProps.values.fname}
+                        onChangeText = {formikProps.handleChange('Firstname')}
+                        value = {formikProps.values.Firstname}
                     />
+                     <Text style = {{fontSize:12,color:'crimson'}}>{formikProps.touched.Firstname && formikProps.errors.Firstname}</Text>
 
 
-                    <View style = {{marginTop:"5%"}} >
+                    <View style = {{marginTop:"0%"}} >
                     <Text  style = {{fontSize:32}} >Last Name:</Text>
                     </View>
 
@@ -57,22 +121,24 @@ export default function SeekSignup({navigation}) {
                         style={{height: 50, borderColor: 'black', borderWidth: 2 ,borderRadius:7, marginBottom:10, paddingHorizontal:15,fontSize:21}}
                         placeholder = ''
                         keyboardType = "email-address"
-                        onChangeText = {formikProps.handleChange('lname')}
-                        value = {formikProps.values.lname}
+                        onChangeText = {formikProps.handleChange('Lastname')}
+                        value = {formikProps.values.Lastname}
                     />
+                    <Text style = {{fontSize:12,color:'crimson'}}>{formikProps.touched.Lastname && formikProps.errors.Lastname}</Text>
 
-                    <View style = {{marginTop:"5%"}} >
+                    <View style = {{marginTop:"0%"}} >
                     <Text  style = {{fontSize:32}} >Email:</Text>
                     </View>
                     <TextInput 
                         style={{height: 50, borderColor: 'black', borderWidth: 2 ,borderRadius:7, marginBottom:10, paddingHorizontal:15,fontSize:21}}
                         placeholder = ''
                         keyboardType = "email-address"
-                        onChangeText = {formikProps.handleChange('email')}
-                        value = {formikProps.values.email}
+                        onChangeText = {formikProps.handleChange('Email')}
+                        value = {formikProps.values.Email}
                     />
+                    <Text style = {{fontSize:12,color:'crimson'}}>{formikProps.touched.Email && formikProps.errors.Email}</Text>
 
-                    <View style = {{marginTop:"5%"}} >
+                    <View style = {{marginTop:"0%"}} >
                     <Text  style = {{fontSize:32}} >Password:</Text>
                     </View>
                     <TextInput 
@@ -82,9 +148,9 @@ export default function SeekSignup({navigation}) {
                         onChangeText = {formikProps.handleChange('password')}
                         value = {formikProps.values.password}
                     />
+                    <Text style = {{fontSize:12,color:'crimson'}}>{formikProps.touched.password && formikProps.errors.password}</Text>
 
-
-                    <View style = {{marginTop:"5%"}} >
+                    <View style = {{marginTop:"0%"}} >
                     <Text  style = {{fontSize:32}} >Phone number:</Text>
                     </View>
                     <TextInput 
@@ -94,8 +160,9 @@ export default function SeekSignup({navigation}) {
                         onChangeText = {formikProps.handleChange('phone')}
                         value = {formikProps.values.phone}
                     />
+                    <Text style = {{fontSize:12,color:'crimson'}}>{formikProps.touched.phone && formikProps.errors.phone}</Text>
 
-                    <View style = {{marginTop:"5%"}} >
+                    <View style = {{marginTop:"0%"}} >
                     <Text  style = {{fontSize:32}} >Age:</Text>
                     </View>
                     <TextInput 
@@ -105,10 +172,16 @@ export default function SeekSignup({navigation}) {
                         onChangeText = {formikProps.handleChange('age')}
                         value = {formikProps.values.age}
                     />
+                    <Text style = {{fontSize:12,color:'crimson'}}>{formikProps.touched.age && formikProps.errors.age}</Text>
 
                   <Button onPress={formikProps.handleSubmit} title="Sign up" type="outline" buttonStyle = {styles.buttonStyle} titleStyle = {styles.innerText} />
                   <Button onPress = {goBack} title="Back" type="outline" buttonStyle = {styles.backButton} titleStyle = {styles.backText} />
                     
+                        <Text  style = {{fontSize:32}} ></Text>
+                        <Text  style = {{fontSize:32}} ></Text>
+                        <Text  style = {{fontSize:32}} ></Text>
+                        <Text  style = {{fontSize:32}} ></Text>
+                        <Text  style = {{fontSize:32}} ></Text>
                         <Text  style = {{fontSize:32}} ></Text>
                         <Text  style = {{fontSize:32}} ></Text>
                         <Text  style = {{fontSize:32}} ></Text>
@@ -151,7 +224,7 @@ const styles = StyleSheet.create({
 
     },
     textHeader:{
-        fontSize:72,
+        fontSize:50,
         fontWeight:"100",
         textAlign:"center",
         fontFamily:'Roboto'

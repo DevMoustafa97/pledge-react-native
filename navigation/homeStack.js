@@ -4,6 +4,7 @@ import Home from '../pages/Home';
 import Login from '../pages/Login';
 import VolSignup from '../pages/VolSignup'
 import SeekSignup from '../pages/SeekSignup'
+import Profile from '../pages/Profile'
 const screens = {
   Home: {
     screen: Home,
@@ -16,6 +17,9 @@ const screens = {
   },
   SeekSignup:{
     screen:SeekSignup,
+  },
+  Profile:{
+    screen:Profile,
   },
   
 };
